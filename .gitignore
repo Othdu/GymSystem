@@ -1,0 +1,49 @@
+## .NET
+bin/
+obj/
+out/
+
+## Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Rider / VS Code
+.idea/
+.vscode/
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+
+## NuGet
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+## Secrets — never commit these
+appsettings.Development.json
+appsettings.Local.json
+*.env
+.env
+
+## OS files
+.DS_Store
+Thumbs.db
+
+## Logs
+*.log
+logs/
+bin/
+obj/
+.vs/
+*.user
+.env
+*.db
+appsettings.Development.json
