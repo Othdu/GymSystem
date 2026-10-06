@@ -15,9 +15,8 @@ namespace GymSystem.Infrastructure.Persistence.Configurations
         {
             builder.HasKey(cs => cs.Id);
             builder.Property(cs => cs.StartTime).IsRequired().HasMaxLength(100);
-            
-            builder .Property<uint>("RowVersion").IsRowVersion();
 
+            builder.Property<byte[]>("RowVersion").IsRowVersion();
             builder.Metadata.FindNavigation(nameof(ClassSession.Bookings))!
                 .SetPropertyAccessMode(PropertyAccessMode.Field);   
 
