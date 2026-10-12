@@ -32,8 +32,7 @@ namespace GymSystem.Domain.Entities
                 throw new DomainException("End time must be after start time.");
             if (capacity <= 0)
                 throw new DomainException("Capacity must be greater than zero.");
-            if (startTime < DateTime.Now)
-                throw new DomainException("Start time cannot be in the past.");
+           
             BranchId = branchId;
             InstructorId = instructorId;
             Title = title;
