@@ -4,7 +4,8 @@ using System.Text;
 
 namespace GymSystem.Application.Common
 {
-    internal class ConcurrencyExecption
+    public class ConcurrencyException : Exception
     {
+        public ConcurrencyException(string message) : base(message) { }
     }
 }

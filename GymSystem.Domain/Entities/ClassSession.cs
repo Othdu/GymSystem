@@ -19,6 +19,7 @@ namespace GymSystem.Domain.Entities
         public string Title { get; private set; }
         public DateTime StartTime { get; private set; }
         public DateTime EndTime { get; private set; }
+        public DateTime? LastModified { get; private set; }
         public int Capacity { get; private set; }
 
         public IReadOnlyCollection<Booking> Bookings => _bookings.AsReadOnly();
@@ -58,6 +59,7 @@ namespace GymSystem.Domain.Entities
             var status = IsFull ? BookingStatus.Waitlisted : BookingStatus.Booked;
             var booking = Booking.Create(Id, memberId, status, now);
             _bookings.Add(booking);
+            LastModified = now;
             return booking;
         }
         public Booking? Cancel(int memberId, DateTime now)
@@ -68,6 +70,7 @@ namespace GymSystem.Domain.Entities
             var WasBooked = booking.Status == BookingStatus.Booked;
             var isLate = StartTime - now < LateCancellationThreshold;
             booking.Cancel(isLate, now);
+            LastModified = now; 
 
             if (!WasBooked) return null;
 

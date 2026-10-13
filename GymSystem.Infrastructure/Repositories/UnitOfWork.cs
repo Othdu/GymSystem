@@ -5,6 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GymSystem.Application.Abstractions;
+using GymSystem.Application.Common;
+using Microsoft.EntityFrameworkCore;
+
 using GymSystem.Infrastructure.Persistence;
 
 namespace GymSystem.Infrastructure.Repositories
@@ -14,7 +17,17 @@ namespace GymSystem.Infrastructure.Repositories
         private readonly GymSystemDbContext _db;
 
         public UnitOfWork(GymSystemDbContext db) => _db = db;
-        public Task <int >SaveChangesAsync(CancellationToken ct = default) => _db.SaveChangesAsync(ct);
+        public async Task<int> SaveChangesAsync(CancellationToken ct = default)
+        {
+            try
+            {
+                return await _db.SaveChangesAsync(ct);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw new ConcurrencyException("This class was just changed by someone else. Please try again.");
+            }
+        }
 
 
 

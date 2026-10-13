@@ -30,6 +30,10 @@ namespace GymSystem.Api.Middleware
             {
                 await WriteErrorAsync(context, HttpStatusCode.NotFound, ex.Message);
             }
+            catch(ConcurrencyException ex)
+            {
+                await WriteErrorAsync(context, HttpStatusCode.Conflict, ex.Message);
+            }
 
             catch (Exception ex)
             {
