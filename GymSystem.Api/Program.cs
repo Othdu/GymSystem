@@ -2,6 +2,8 @@ using FluentValidation.AspNetCore;
 using GymSystem.Application;
 using GymSystem.Infrastructure;
 using Scalar.AspNetCore;
+using GymSystem.Infrastructure.Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -16,9 +18,11 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<GymSystemDbContext>();
+    await new DbSeeder(db).SeedAsync();
 }
+
 
 app.UseHttpsRedirection();
 app.UseMiddleware<GymSystem.Api.Middleware.ExceptionHandlingMiddleware>();
