@@ -22,8 +22,9 @@ if (app.Environment.IsDevelopment())
     var db = scope.ServiceProvider.GetRequiredService<GymSystemDbContext>();
     await new DbSeeder(db).SeedAsync();
 }
-
-
+app.MapOpenApi();
+app.MapScalarApiReference();
+app.UseAuthorization();
 app.UseHttpsRedirection();
 app.UseMiddleware<GymSystem.Api.Middleware.ExceptionHandlingMiddleware>();
 app.UseAuthorization();
