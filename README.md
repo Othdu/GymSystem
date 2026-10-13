@@ -4,7 +4,8 @@ A backend API for gym memberships and class bookings with a waitlist, built with
 
 The focus of the project is business rules and correctness: a membership state machine, capacity and waitlist handling, and protection against two people booking the last spot at the same time.
 
-<!-- Add a screenshot of the Scalar page at docs/scalar.png, then uncomment the next line -->
+<img width="1429" height="734" alt="image" src="https://github.com/user-attachments/assets/b6bbc0ff-dd2f-47ec-94d6-59a84b31c486" />
+
 <!-- ![API documentation](docs/scalar.png) -->
 
 ## Features
