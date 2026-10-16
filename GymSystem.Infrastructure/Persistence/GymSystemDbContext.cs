@@ -13,10 +13,13 @@ namespace GymSystem.Infrastructure.Persistence
         public GymSystemDbContext(DbContextOptions<GymSystemDbContext> options) : base(options) { }
 
         public DbSet<Branch> Branches => Set<Branch>();
+        public DbSet<User> Users => Set<User>();
         public DbSet<Instructor> Instructors => Set<Instructor>();
         public DbSet<MembershipPlan> MembershipPlans => Set<MembershipPlan>();
         public DbSet<Member> Members => Set<Member>();
-            public DbSet<Membership> Memberships => Set<Membership>();
+        public DbSet<User> Users => Set<User>();
+
+        public DbSet<Membership> Memberships => Set<Membership>();
 
         public DbSet<ClassSession> ClassSessions => Set<ClassSession>();
        
