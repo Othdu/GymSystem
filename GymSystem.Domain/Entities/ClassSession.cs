@@ -16,7 +16,7 @@ namespace GymSystem.Domain.Entities
         public int Id { get; private set; }
         public int BranchId { get; private set; }
         public int InstructorId { get; private set; }
-        public string Title { get; private set; }
+        public string Title { get; private set; } = string.Empty;
         public DateTime StartTime { get; private set; }
         public DateTime EndTime { get; private set; }
         public DateTime? LastModified { get; private set; }
@@ -77,6 +77,20 @@ namespace GymSystem.Domain.Entities
             var next = _bookings.Where(b => b.Status == BookingStatus.Waitlisted).OrderBy(b => b.CreatedAt).OrderBy(b => b.CreatedAt).FirstOrDefault();
             next?.Promote();
             return next;
+        }
+        public Booking MarkAttendance(int memberId, BookingStatus outcome, DateTime now)
+        {
+            if (outcome is not (BookingStatus.Attended or BookingStatus.NoShow))
+                throw new DomainException("Outcome must be Attended or NoShow.");
+
+            if (now < StartTime)
+                throw new DomainException("Attendance can only be recorded after the class has started.");
+
+            var booking = _bookings.FirstOrDefault(b => b.MemberId == memberId && b.Status == BookingStatus.Booked)
+                ?? throw new DomainException("No booked reservation found for this member in this class.");
+
+            booking.MarkAttendance(outcome);
+            return booking;
         }
 
         private bool HasActiveBooking(int memberId) => _bookings.Any(b => b.MemberId == memberId && (b.Status is BookingStatus.Booked or BookingStatus.Waitlisted));

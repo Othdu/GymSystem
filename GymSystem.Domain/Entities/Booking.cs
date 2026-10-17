@@ -39,6 +39,12 @@ namespace GymSystem.Domain.Entities
             Status = isLate?BookingStatus.LateCancelled:BookingStatus.Cancelled;
             CancelledAt = now;
         }
+        internal void MarkAttendance(BookingStatus outcome)
+        {
+            if (Status != BookingStatus.Booked)
+                throw new DomainException("only booked reservation can be marked as attended or no-show");
+            Status = outcome;
+        }
 
 
 

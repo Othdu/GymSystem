@@ -24,6 +24,7 @@
     <ProjectReference Include="..\GymSystem.Domain\GymSystem.Domain.csproj" />
     <ProjectReference Include="..\GymSystem.Application\GymSystem.Application.csproj" />
     <ProjectReference Include="..\GymSystem.Infrastructure\GymSystem.Infrastructure.csproj" />
+    <ProjectReference Include="..\GymSystem.Api\GymSystem.Api.csproj" />
   </ItemGroup>
 
 </Project>

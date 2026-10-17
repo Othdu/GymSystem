@@ -44,6 +44,18 @@ public class ClassSessionRepository : IClassSessionRepository
             .Where(c => c.BranchId == branchId && c.StartTime >= start && c.StartTime < end)
             .ToListAsync(ct);
     }
+    public async Task<List<ClassSession>> GetByInstructorAndDateAsync(
+    int instructorId, DateOnly date, CancellationToken ct = default)
+    {
+        var start = date.ToDateTime(TimeOnly.MinValue);
+        var end = start.AddDays(1);
+
+        return await _db.ClassSessions
+            .Include(c => c.Bookings)
+            .Where(c => c.InstructorId == instructorId && c.StartTime >= start && c.StartTime < end)
+            .OrderBy(c => c.StartTime)
+            .ToListAsync(ct);
+    }
 
     public async Task AddAsync(ClassSession session, CancellationToken ct = default) =>
         await _db.ClassSessions.AddAsync(session, ct);

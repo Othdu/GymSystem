@@ -1,32 +1,72 @@
-using FluentValidation.AspNetCore;
+using FluentValidation;
+using GymSystem.Api.Contracts;
+using GymSystem.Api.Filters;
+using GymSystem.Api.Middleware;
+using GymSystem.Api.OpenApi;
 using GymSystem.Application;
+using GymSystem.Application.Abstractions;
 using GymSystem.Infrastructure;
-using Scalar.AspNetCore;
 using GymSystem.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
+using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddControllers(options => options.Filters.Add<ValidationFilter>())
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())); 
+builder.Services.AddOpenApi(options => options.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
-builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<BookClassBody>();
+
+var jwt = builder.Configuration.GetSection("Jwt");
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.MapInboundClaims = false; // keep claim names exactly as the generator wrote them
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwt["Issuer"],
+            ValidateAudience = true,
+            ValidAudience = jwt["Audience"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Secret"]!)),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromSeconds(30),
+            NameClaimType = "sub",
+            RoleClaimType = "role"
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ---- dev only: sample data ----
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<GymSystemDbContext>();
-    await new DbSeeder(db).SeedAsync();
+    var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHashing>();
+    await new DbSeeder(db, hasher).SeedAsync();
+
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
-app.MapOpenApi();
-app.MapScalarApiReference();
-app.UseAuthorization();
+
+// ---- the request pipeline, in order ----
 app.UseHttpsRedirection();
-app.UseMiddleware<GymSystem.Api.Middleware.ExceptionHandlingMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

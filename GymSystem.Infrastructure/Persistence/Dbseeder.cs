@@ -1,17 +1,27 @@
 using GymSystem.Domain.Entities;
 using GymSystem.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
-
+using GymSystem.Application.Abstractions;
 namespace GymSystem.Infrastructure.Persistence;
 
 public class DbSeeder
 {
     private readonly GymSystemDbContext _db;
 
-    public DbSeeder(GymSystemDbContext db) => _db = db;
-
+    private readonly IPasswordHashing _hasher;
+    public DbSeeder(GymSystemDbContext db, IPasswordHashing hasher)
+    {
+        _db = db;
+        _hasher = hasher;
+    }
     public async Task SeedAsync()
     {
+        // 0. a dev-only admin account
+        if (!await _db.Users.AnyAsync(u => u.Role == UserRole.Admin))
+        {
+            _db.Users.Add(User.CreateAdmin("admin@gym.local", _hasher.Hash("Admin123!")));
+            await _db.SaveChangesAsync();
+        }
         // 1. reference data: only created once
         if (!await _db.Branches.AnyAsync())
         {
@@ -42,7 +52,20 @@ public class DbSeeder
         {
             var branches = await _db.Branches.OrderBy(b => b.Id).ToListAsync();
             var instructors = await _db.Instructors.OrderBy(i => i.Id).ToListAsync();
+            // dev-only instructor logins, one per seeded instructor
+            var instructorAccounts = new[]
+            {
+    ("sara@gym.local", instructors[0]),
+    ("omar@gym.local", instructors[1])
+};
 
+            foreach (var (email, instructor) in instructorAccounts)
+            {
+                if (!await _db.Users.AnyAsync(u => u.Email == email))
+                    _db.Users.Add(User.CreateInstructor(email, _hasher.Hash("Instructor123!"), instructor));
+            }
+
+            await _db.SaveChangesAsync();
             var tomorrow = DateTime.UtcNow.Date.AddDays(1);
 
             _db.ClassSessions.AddRange(
@@ -57,5 +80,8 @@ public class DbSeeder
 
             await _db.SaveChangesAsync();
         }
+
+
+
     }
 }

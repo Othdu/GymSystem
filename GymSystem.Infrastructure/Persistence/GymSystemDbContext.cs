@@ -17,7 +17,6 @@ namespace GymSystem.Infrastructure.Persistence
         public DbSet<Instructor> Instructors => Set<Instructor>();
         public DbSet<MembershipPlan> MembershipPlans => Set<MembershipPlan>();
         public DbSet<Member> Members => Set<Member>();
-        public DbSet<User> Users => Set<User>();
 
         public DbSet<Membership> Memberships => Set<Membership>();
 
