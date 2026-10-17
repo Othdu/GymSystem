@@ -97,6 +97,9 @@ namespace GymSystem.Infrastructure.Migrations
                     b.Property<int>("InstructorId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime2");
+
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
@@ -230,6 +233,51 @@ namespace GymSystem.Infrastructure.Migrations
                     b.ToTable("MembershipPlans");
                 });
 
+            modelBuilder.Entity("GymSystem.Domain.Entities.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("InstructorId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MemberId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("InstructorId")
+                        .IsUnique()
+                        .HasFilter("[InstructorId] IS NOT NULL");
+
+                    b.HasIndex("MemberId")
+                        .IsUnique()
+                        .HasFilter("[MemberId] IS NOT NULL");
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("GymSystem.Domain.Entities.Booking", b =>
                 {
                     b.HasOne("GymSystem.Domain.Entities.ClassSession", null)
@@ -246,6 +294,23 @@ namespace GymSystem.Infrastructure.Migrations
                         .HasForeignKey("PlanId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("GymSystem.Domain.Entities.User", b =>
+                {
+                    b.HasOne("GymSystem.Domain.Entities.Instructor", "Instructor")
+                        .WithOne()
+                        .HasForeignKey("GymSystem.Domain.Entities.User", "InstructorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GymSystem.Domain.Entities.Member", "Member")
+                        .WithOne()
+                        .HasForeignKey("GymSystem.Domain.Entities.User", "MemberId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Instructor");
+
+                    b.Navigation("Member");
                 });
 
             modelBuilder.Entity("GymSystem.Domain.Entities.ClassSession", b =>

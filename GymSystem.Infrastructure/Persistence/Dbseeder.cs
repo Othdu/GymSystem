@@ -1,17 +1,27 @@
 using GymSystem.Domain.Entities;
 using GymSystem.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
-
+using GymSystem.Application.Abstractions;
 namespace GymSystem.Infrastructure.Persistence;
 
 public class DbSeeder
 {
     private readonly GymSystemDbContext _db;
 
-    public DbSeeder(GymSystemDbContext db) => _db = db;
-
+    private readonly IPasswordHashing _hasher;
+    public DbSeeder(GymSystemDbContext db, IPasswordHashing hasher)
+    {
+        _db = db;
+        _hasher = hasher;
+    }
     public async Task SeedAsync()
     {
+        // 0. a dev-only admin account
+        if (!await _db.Users.AnyAsync(u => u.Role == UserRole.Admin))
+        {
+            _db.Users.Add(User.CreateAdmin("admin@gym.local", _hasher.Hash("Admin123!")));
+            await _db.SaveChangesAsync();
+        }
         // 1. reference data: only created once
         if (!await _db.Branches.AnyAsync())
         {

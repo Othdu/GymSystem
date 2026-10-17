@@ -35,6 +35,15 @@ namespace GymSystem.Api.Middleware
                 await WriteErrorAsync(context, HttpStatusCode.Conflict, ex.Message);
             }
 
+            catch (UnauthorizedAccessException ex)
+            {
+                await WriteErrorAsync(context, HttpStatusCode.Unauthorized, ex.Message);
+            }
+            catch (ForbiddenException ex)
+            {
+                await WriteErrorAsync(context, HttpStatusCode.Forbidden, ex.Message);
+            }
+
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unhandled exception occurred.");

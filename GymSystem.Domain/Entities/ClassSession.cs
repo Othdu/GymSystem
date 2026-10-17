@@ -16,7 +16,7 @@ namespace GymSystem.Domain.Entities
         public int Id { get; private set; }
         public int BranchId { get; private set; }
         public int InstructorId { get; private set; }
-        public string Title { get; private set; }
+        public string Title { get; private set; } = string.Empty;
         public DateTime StartTime { get; private set; }
         public DateTime EndTime { get; private set; }
         public DateTime? LastModified { get; private set; }
