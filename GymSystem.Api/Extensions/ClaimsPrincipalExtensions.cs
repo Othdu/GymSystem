@@ -13,6 +13,7 @@ public static class ClaimsPrincipalExtensions
             ? id
             : throw new ForbiddenException("This account is not a gym member.");
     }
+<<<<<<< HEAD
     public static int GetInstructorId(this ClaimsPrincipal user)
     {
         var value = user.FindFirst("instructor_id")?.Value;
@@ -22,4 +23,6 @@ public static class ClaimsPrincipalExtensions
 
         return id;
     }
+=======
+>>>>>>> 1e24ce82b74a00cfc4f8e4cce973508ed2cbf585
 }
