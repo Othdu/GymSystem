@@ -22,6 +22,10 @@ public class ClassSessionRepository : IClassSessionRepository
         await _db.ClassSessions
             .Include(c => c.Bookings)
             .FirstOrDefaultAsync(c => c.Id == id, ct);
+    public async Task<bool> InstructorHasOverlapAsync(
+    int instructorId, DateTime start, DateTime end, CancellationToken ct = default) =>
+    await _db.ClassSessions.AnyAsync(c =>
+        c.InstructorId == instructorId && c.StartTime < end && c.EndTime > start, ct);
 
     public async Task<List<ClassSession>> GetMemberSessionsAsync(
         int memberId, DateTime from, DateTime to, int excludeSessionId, CancellationToken ct = default) =>

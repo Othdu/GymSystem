@@ -15,7 +15,7 @@ namespace GymSystem.Application.Abstractions
         Task<List<ClassSession>> GetByBranchAndDateAsync(int branchId, DateOnly date, CancellationToken ct = default);
         Task<List<ClassSession>> GetByInstructorAndDateAsync(int instructorId, DateOnly date, CancellationToken ct = default);
         Task AddAsync(ClassSession session, CancellationToken ct = default);
-        Task<bool> InstructorHasOverLapAsync(int instructorId, DateTime start, DateTime end, CancellationToken ct = default);
+        Task<bool> InstructorHasOverlapAsync(int instructorId, DateTime start, DateTime end, CancellationToken ct = default);
     }
 }
 

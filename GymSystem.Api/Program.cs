@@ -1,9 +1,6 @@
 using FluentValidation;
 using GymSystem.Api.Contracts;
-<<<<<<< HEAD
 using GymSystem.Api.Filters;
-=======
->>>>>>> 1e24ce82b74a00cfc4f8e4cce973508ed2cbf585
 using GymSystem.Api.Middleware;
 using GymSystem.Api.OpenApi;
 using GymSystem.Application;
@@ -15,21 +12,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
-<<<<<<< HEAD
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-builder.Services.AddControllers(options => options.Filters.Add<ValidationFilter>())
-    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())); 
-=======
-using GymSystem.Api.Filters;
-var builder = WebApplication.CreateBuilder(args);
-
 // ---- services ----
-builder.Services.AddControllers(options => options.Filters.Add<ValidationFilter>()); 
->>>>>>> 1e24ce82b74a00cfc4f8e4cce973508ed2cbf585
+builder.Services.AddControllers(options => options.Filters.Add<ValidationFilter>())
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddOpenApi(options => options.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();

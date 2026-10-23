@@ -11,7 +11,6 @@ namespace GymSystem.Application.Abstractions
     {
         Task<MembershipPlan?> GetByIdAsync(int id, CancellationToken ct = default); 
         Task<List<MembershipPlan>> GetAllAsync(CancellationToken ct = default);
-
         Task AddAsync(MembershipPlan plan, CancellationToken ct = default);
 
     }

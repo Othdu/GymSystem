@@ -13,6 +13,8 @@ namespace GymSystem.Infrastructure.Repositories
     public class MembershipPlanRepository : IMembershipPlanRepository
     {
         private readonly GymSystemDbContext _db;
+        public async Task AddAsync(MembershipPlan plan, CancellationToken ct = default) =>
+    await _db.MembershipPlans.AddAsync(plan, ct);
         public MembershipPlanRepository(GymSystemDbContext db) => _db = db;
         public async Task<MembershipPlan?> GetByIdAsync(int id, CancellationToken ct = default) =>
             await _db.MembershipPlans.FirstOrDefaultAsync(p => p.Id == id, ct);

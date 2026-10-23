@@ -20,6 +20,8 @@ public static class DependencyInjection
         services.AddScoped<IMembershipPlanRepository, MembershipPlanRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+        services.AddScoped<IBranchRepository, BranchRepository>();
+        services.AddScoped<IInstructorRepository, InstructorRepository>();
         var jwt = new JwtSettings
         {
             Issuer = config["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer is missing."),
