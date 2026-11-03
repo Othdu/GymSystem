@@ -17,7 +17,10 @@ public class MembershipRepository : IMembershipRepository
             .Where(m => m.MemberId == memberId &&
                        (m.Status == MembershipStatus.Active || m.Status == MembershipStatus.Frozen))
             .FirstOrDefaultAsync(ct);
-
+    public async Task<List<Membership>> GetActiveEndedOnOrBeforeAsync(DateTime now, CancellationToken ct = default) =>
+    await _db.Memberships
+        .Where(m => m.Status == MembershipStatus.Active && m.EndDate <= now)
+        .ToListAsync(ct);
     public async Task AddAsync(Membership membership, CancellationToken ct = default) =>
         await _db.Memberships.AddAsync(membership, ct);
 }

@@ -1,11 +1,13 @@
 ﻿using GymSystem.Application.Abstractions;
+using GymSystem.Application.Memberships;
+using GymSystem.Infrastructure.Auth;
+using GymSystem.Infrastructure.BackgroundJobs;
 using GymSystem.Infrastructure.Persistence;
 using GymSystem.Infrastructure.Repositories;
 using GymSystem.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using GymSystem.Infrastructure.Auth;
 namespace GymSystem.Infrastructure;
 
 public static class DependencyInjection
@@ -17,6 +19,8 @@ public static class DependencyInjection
 
         services.AddScoped<IClassSessionRepository, ClassSessionRepository>();
         services.AddScoped<IMembershipRepository, MembershipRepository>();
+        services.AddScoped<IMembershipExpiryService, MembershipExpiryService>();
+        services.AddHostedService<MembershipExpiryWorker>();
         services.AddScoped<IMembershipPlanRepository, MembershipPlanRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
