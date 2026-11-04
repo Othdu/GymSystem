@@ -1,5 +1,6 @@
 ﻿using GymSystem.Application.Abstractions;
 using GymSystem.Application.Common;
+using GymSystem.Application.Timetable;
 using GymSystem.Domain.Entities;
 using GymSystem.Domain.Exceptions;
 
@@ -17,6 +18,7 @@ public class AdminCatalogService : IAdminCatalogService
     private readonly IBranchRepository _branches;
     private readonly IInstructorRepository _instructors;
     private readonly IMembershipPlanRepository _plans;
+    private readonly ICacheService _cache;
     private readonly IClassSessionRepository _sessions;
     private readonly IUnitOfWork _uow;
     private readonly IDateTimeProvider _clock;
@@ -27,7 +29,8 @@ public class AdminCatalogService : IAdminCatalogService
         IMembershipPlanRepository plans,
         IClassSessionRepository sessions,
         IUnitOfWork uow,
-        IDateTimeProvider clock)
+        IDateTimeProvider clock,
+        ICacheService cache)
     {
         _branches = branches;
         _instructors = instructors;
@@ -35,6 +38,7 @@ public class AdminCatalogService : IAdminCatalogService
         _sessions = sessions;
         _uow = uow;
         _clock = clock;
+        _cache = cache;
     }
 
     public async Task<BranchResponse> CreateBranchAsync(CreateBranchRequest request, CancellationToken ct = default)
@@ -75,6 +79,8 @@ public class AdminCatalogService : IAdminCatalogService
 
         await _sessions.AddAsync(session, ct);
         await _uow.SaveChangesAsync(ct);
+        await _cache.RemoveAsync(
+        TimetableCacheKeys.For(session.BranchId, DateOnly.FromDateTime(session.StartTime)), ct);
 
         return new ClassResponse(
             session.Id, session.BranchId, session.InstructorId, session.Title,

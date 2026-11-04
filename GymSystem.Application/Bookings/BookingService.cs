@@ -1,5 +1,6 @@
 ﻿using GymSystem.Application.Abstractions;
 using GymSystem.Application.Common;
+using GymSystem.Application.Timetable;
 using GymSystem.Domain.Exceptions;
 
 namespace GymSystem.Application.Bookings;
@@ -16,16 +17,18 @@ public class BookingService : IBookingService
     private readonly IMembershipRepository _memberships;
     private readonly IUnitOfWork _uow;
     private readonly IDateTimeProvider _clock;
+    private readonly ICacheService _cache;
 
     public BookingService(
         IClassSessionRepository sessions,
         IMembershipRepository memberships,
         IUnitOfWork uow,
-        IDateTimeProvider clock)
+        IDateTimeProvider clock, ICacheService cache)
     {
         _sessions = sessions;
         _memberships = memberships;
         _uow = uow;
+         _cache = cache;
         _clock = clock;
     }
 
@@ -36,7 +39,8 @@ public class BookingService : IBookingService
 
         var membership = await _memberships.GetCurrentForMemberAsync(request.MemberId, ct)
             ?? throw new NotFoundException("This member has no current membership.");
-
+        await _cache.RemoveAsync(
+    TimetableCacheKeys.For(session.BranchId, DateOnly.FromDateTime(session.StartTime)), ct);
         // rule that spans several sessions, so it lives here and not inside ClassSession
         var memberSessions = await _sessions.GetMemberSessionsAsync(
             request.MemberId, session.StartTime.Date, session.StartTime.Date.AddDays(1),
@@ -57,7 +61,8 @@ public class BookingService : IBookingService
             ?? throw new NotFoundException($"Class session {request.ClassSessionId} was not found.");
 
         var promoted = session.Cancel(request.MemberId, _clock.UtcNow);
-
+        await _cache.RemoveAsync(
+    TimetableCacheKeys.For(session.BranchId, DateOnly.FromDateTime(session.StartTime)), ct);
         var cancelled = session.Bookings
             .Where(b => b.MemberId == request.MemberId && b.CancelledAt != null)
             .OrderByDescending(b => b.CancelledAt)

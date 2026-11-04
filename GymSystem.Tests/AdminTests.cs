@@ -20,6 +20,7 @@ public class AdminCatalogServiceTests
     private readonly Mock<IClassSessionRepository> _sessions = new();
     private readonly Mock<IUnitOfWork> _uow = new();
     private readonly Mock<IDateTimeProvider> _clock = new();
+    private readonly Mock<ICacheService> _cache = new();
     private readonly AdminCatalogService _service;
 
     public AdminCatalogServiceTests()
@@ -30,9 +31,10 @@ public class AdminCatalogServiceTests
         _sessions.Setup(s => s.InstructorHasOverlapAsync(
                 It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
+        _cache.Setup(c => c.RemoveAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         _service = new AdminCatalogService(
-            _branches.Object, _instructors.Object, _plans.Object, _sessions.Object, _uow.Object, _clock.Object);
+            _branches.Object, _instructors.Object, _plans.Object, _sessions.Object, _uow.Object, _clock.Object, _cache.Object);
     }
 
     private static CreateClassRequest ClassRequest(DateTime? start = null)
@@ -42,7 +44,7 @@ public class AdminCatalogServiceTests
     }
 
     [Fact]
-    public async Task CreateClass_Valid_SavesOnce()
+    public async Task CreateClass_Valid_SavesOnce_AndClearsTimetableCache()
     {
         ClassSession? added = null;
         _sessions.Setup(s => s.AddAsync(It.IsAny<ClassSession>(), It.IsAny<CancellationToken>()))
@@ -54,8 +56,8 @@ public class AdminCatalogServiceTests
         Assert.NotNull(added);
         Assert.Equal("Yoga", response.Title);
         _uow.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _cache.Verify(c => c.RemoveAsync("timetable:1:2026-10-02", It.IsAny<CancellationToken>()), Times.Once);
     }
-
     [Fact]
     public async Task CreateClass_InThePast_Throws()
     {

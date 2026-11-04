@@ -17,6 +17,8 @@ public static class DependencyInjection
         services.AddDbContext<GymSystemDbContext>(options =>
             options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
 
+        services.AddMemoryCache();
+        services.AddSingleton<ICacheService, InMemoryCacheService>();
         services.AddScoped<IClassSessionRepository, ClassSessionRepository>();
         services.AddScoped<IMembershipRepository, MembershipRepository>();
         services.AddScoped<IMembershipExpiryService, MembershipExpiryService>();

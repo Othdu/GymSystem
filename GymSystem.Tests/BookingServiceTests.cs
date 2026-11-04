@@ -1,5 +1,6 @@
 ﻿using GymSystem.Application.Abstractions;
 using GymSystem.Application.Bookings;
+using GymSystem.Application.Timetable;
 using GymSystem.Domain.Entities;
 using GymSystem.Domain.Enums;
 using GymSystem.Domain.Exceptions;
@@ -12,7 +13,7 @@ public class BookingServiceTests
 {
     private static readonly DateTime Start = new(2026, 10, 1, 0, 0, 0, DateTimeKind.Utc);
     private static readonly DateTime Now = Start.AddDays(1);
-
+    private readonly Mock<ICacheService> _cache = new();
     private readonly Mock<IClassSessionRepository> _sessions = new();
     private readonly Mock<IMembershipRepository> _memberships = new();
     private readonly Mock<IUnitOfWork> _uow = new();
@@ -22,7 +23,8 @@ public class BookingServiceTests
     public BookingServiceTests()
     {
         _clock.Setup(c => c.UtcNow).Returns(Now);
-        _service = new BookingService(_sessions.Object, _memberships.Object, _uow.Object, _clock.Object);
+        _service = new BookingService(_sessions.Object, _memberships.Object, _uow.Object, _clock.Object, _cache.Object);
+
     }
 
     private static Membership NewMembership(int memberId) =>
@@ -54,7 +56,6 @@ public class BookingServiceTests
         var session = new ClassSession(1, 1, "Yoga", Start.AddDays(10), Start.AddDays(10).AddHours(1), 1);
         session.Book(1, NewMembership(1), Now);
         session.Book(2, NewMembership(2), Now); // waitlisted, class has 1 spot
-
         _sessions.Setup(r => r.GetByIdWithBookingsAsync(10, It.IsAny<CancellationToken>()))
                  .ReturnsAsync(session);
 
@@ -63,5 +64,8 @@ public class BookingServiceTests
         Assert.Equal(BookingStatus.Cancelled, response.CancelledAs);
         Assert.Equal(2, response.PromotedMemberId);
         _uow.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _cache.Verify(c => c.RemoveAsync(
+            TimetableCacheKeys.For(session.BranchId, DateOnly.FromDateTime(session.StartTime)),
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 }
